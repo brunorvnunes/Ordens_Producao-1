@@ -133,12 +133,64 @@ def criar_ordem():
     conn.close()
     #201 - Retornar "created" com o registro completo 
     return jsonify(dict(nova_ordem)), 201
+#Rota - Atualizar o status ordem de produção (PUT) ----------------------
+@app.route('/ordens/<int:ordem>', methods=['PUT'])
+def atualizar_ordens(ordem_id):
+    """
+    Atualiza o status de uma ordem de produto existente.
     
+    Parâmetros da URL:
+        ordem_id (int) : ID da ordem a atualizar.
+        
+    Body esperado (JSON):
+        status (str) : Novo Status. Valores aceitos:
+            'Pendente', 'Em andamento', 'Concluida'.
+            
+    Retorna:
+        200: JSON da ordem atualizada;
+        400: erro se status invalido;
+        404 : erro de ordem não encontrada.
+    """
+    
+    
+    dados = request.get_json()
+    
+    if not dados:
+        return jsonify({'erro': 'body da requisicao ausente ou e invalido.'}), 400
+    #Validação do campo do status
+    status_validos = ['pendente', 'em andamento', 'concluido']
+    novo_status = dados.get('status', '').strip()
+    
+    if not novo_status:
+        return jsonify({'erro': 'campo "status" e obrigatorio.'}), 400
+    
+    if novo_status not in status_validos:
+        return ({'erro': f'status invalido! favor usar os permitidos: {status_validos}'}), 400
+    
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    
+    cursor.execute('SELECT id FROM ordens WHERE id = ?', (ordem_id,))
+    if cursor.fetchone() is None:
+        conn.close()
+        return jsonify({'erro': f'ordem {ordem_id} nao encontrada.'}), 404
+    
+    #de fato atualizando a execução
+    cursor.execute('UPDATE ordens SET status = ? WHERE id = ?', (novo_status, ordem_id))
+    
+    conn.commit()
+    
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM ordens WHERE id = ?', (ordem_id))
+    ordem_atualizada = cursor.fetchone()
+    conn.close()
+    
+    return jsonify(dict(ordem_atualizada)), 200
 #PONTO DE PARTIDA -------------------------------------------------------
 
 if __name__=='__main__':
     init_bd()
     
     app.run(debug=True, host='0.0.0.0', port=5000)
-
-
