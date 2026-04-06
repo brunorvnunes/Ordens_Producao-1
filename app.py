@@ -134,7 +134,7 @@ def criar_ordem():
     #201 - Retornar "created" com o registro completo 
     return jsonify(dict(nova_ordem)), 201
 #Rota - Atualizar o status ordem de produção (PUT) ----------------------
-@app.route('/ordens/<int:ordem>', methods=['PUT'])
+@app.route('/ordens/<int:ordem_id>', methods=['PUT'])
 def atualizar_ordens(ordem_id):
     """
     Atualiza o status de uma ordem de produto existente.
@@ -158,14 +158,14 @@ def atualizar_ordens(ordem_id):
     if not dados:
         return jsonify({'erro': 'body da requisicao ausente ou e invalido.'}), 400
     #Validação do campo do status
-    status_validos = ['pendente', 'em andamento', 'concluido']
+    status_validos = ['Pendente', 'Em andamento', 'Concluida']
     novo_status = dados.get('status', '').strip()
     
     if not novo_status:
         return jsonify({'erro': 'campo "status" e obrigatorio.'}), 400
     
     if novo_status not in status_validos:
-        return ({'erro': f'status invalido! favor usar os permitidos: {status_validos}'}), 400
+        return jsonify({'erro': f'status invalido! favor usar os permitidos: {status_validos}'}), 400
     
     conn = get_connection()
     cursor = conn.cursor()
@@ -174,7 +174,7 @@ def atualizar_ordens(ordem_id):
     cursor.execute('SELECT id FROM ordens WHERE id = ?', (ordem_id,))
     if cursor.fetchone() is None:
         conn.close()
-        return jsonify({'erro': f'ordem {ordem_id} nao encontrada.'}), 404
+        return jsonify({'erro': f'Ordem {ordem_id} nao encontrada.'}), 404
     
     #de fato atualizando a execução
     cursor.execute('UPDATE ordens SET status = ? WHERE id = ?', (novo_status, ordem_id))
@@ -183,7 +183,7 @@ def atualizar_ordens(ordem_id):
     
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT * FROM ordens WHERE id = ?', (ordem_id))
+    cursor.execute('SELECT * FROM ordens WHERE id = ?', (ordem_id,))
     ordem_atualizada = cursor.fetchone()
     conn.close()
     
