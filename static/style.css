@@ -1,20 +1,19 @@
-
 /* — Reset e base ————————————————————————————————————————————————— */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
   font-family: 'Segoe UI', Arial, sans-serif;
-  background: #f0f4f8;
-  color: #263238;
+  background: #0b1120; /* Fundo escuro azulado muito suave */
+  color: #e2e8f0; /* Texto claro azulado */
   min-height: 100vh;
 }
 
 /* — Cabecalho ———————————————————————————————————————————————————— */
 header {
-  background: linear-gradient(135deg, #1F3864, #00897B);
-  color: white;
+  background: linear-gradient(135deg, #020617, #064e3b); /* Preto azulado para verde escuro frio */
+  color: #ffffff;
   padding: 1.2rem 2rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
 }
 
 .header-content {
@@ -32,12 +31,13 @@ header h1 { font-size: 1.4rem; font-weight: 700; }
   font-size: 0.8rem;
   padding: 4px 12px;
   border-radius: 20px;
-  background: rgba(255,255,255,0.2);
-  border: 1px solid rgba(255,255,255,0.4);
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.2);
 }
 
-#status-badge.online { background:#00897B; border-color:#00897B; }
-#status-badge.offline { background:#B71C1C; border-color:#B71C1C; }
+#status-badge.online { background: #059669; border-color: #34d399; color: #ffffff; }
+/* Usando azul escuro no offline no lugar do vermelho para manter as cores frias */
+#status-badge.offline { background: #1e3a8a; border-color: #60a5fa; color: #ffffff; } 
 
 /* — Layout principal ————————————————————————————————————————————— */
 main {
@@ -51,18 +51,18 @@ main {
 
 /* — Cards ———————————————————————————————————————————————————————— */
 .card {
-  background: white;
+  background: #1e293b; /* Cinza azulado escuro (Card) */
   border-radius: 10px;
   padding: 1.5rem;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
 }
 
 .card h2 {
   font-size: 1.1rem;
-  color: #00897B;
+  color: #2dd4bf; /* Ciano suave */
   margin-bottom: 1rem;
   padding-bottom: 0.5rem;
-  border-bottom: 2px solid #E0F2F1;
+  border-bottom: 2px solid #334155; /* Linha divisória escura */
 }
 
 /* — Formulario ——————————————————————————————————————————————————— */
@@ -78,17 +78,19 @@ main {
 }
 
 .form-group { display: flex; flex-direction: column; gap: 4px; }
-label { font-size: 0.85rem; font-weight: 600; color: #546E7A; }
+label { font-size: 0.85rem; font-weight: 600; color: #94a3b8; }
 input, select {
   padding: 0.55rem 0.8rem;
-  border: 1.5px solid #CFD8DC;
+  background: #0f172a; /* Fundo dos inputs mais escuro que o card */
+  color: #f1f5f9;
+  border: 1.5px solid #334155;
   border-radius: 6px;
   font-size: 0.95rem;
   transition: border-color 0.2s;
   outline: none;
 }
 
-input:focus, select:focus { border-color: #00897B; }
+input:focus, select:focus { border-color: #2dd4bf; } /* Borda ciano ao focar */
 
 /* — Botoes ——————————————————————————————————————————————————————— */
 button {
@@ -104,9 +106,10 @@ button {
 button:hover { opacity: 0.88; }
 button:active { transform: scale(0.97); }
 
-#btn-cadastrar { background: #00897B; color: white; }
-.btn-atualizar { background: #E0F2F1; color: #00897B; font-size:0.85rem; }
-.btn-excluir { background: #FFEBEE; color: #C62828; font-size:0.8rem; padding:4px 10px; }
+#btn-cadastrar { background: #0d9488; color: white; }
+.btn-atualizar { background: #115e59; color: #5eead4; font-size:0.85rem; }
+/* Excluir em tons de roxo/índigo frio ao invés de vermelho */
+.btn-excluir { background: #312e81; color: #c7d2fe; font-size:0.8rem; padding:4px 10px; } 
 
 /* — Mensagem de feedback ————————————————————————————————————————— */
 .mensagem {
@@ -117,8 +120,9 @@ button:active { transform: scale(0.97); }
   font-weight: 500;
 }
 
-.mensagem.sucesso { background:#E8F5E9; color:#2E7D32; border-left:4px solid #2E7D32; }
-.mensagem.erro { background:#FFEBEE; color:#C62828; border-left:4px solid #C62828; }
+.mensagem.sucesso { background: #064e3b; color: #a7f3d0; border-left: 4px solid #34d399; }
+/* Erro em azul-gelo escuro para manter paleta fria */
+.mensagem.erro { background: #1e3a8a; color: #bfdbfe; border-left: 4px solid #60a5fa; }
 .oculto { display: none; }
 
 /* — Tabela ——————————————————————————————————————————————————————— */
@@ -133,15 +137,15 @@ button:active { transform: scale(0.97); }
 table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
 
 th {
-  background: #263238;
-  color: white;
+  background: #020617; /* Preto super profundo para o cabeçalho */
+  color: #e2e8f0;
   padding: 10px 12px;
   text-align: left;
   font-weight: 600;
 }
 
-td { padding: 10px 12px; border-bottom: 1px solid #ECEFF1; }
-tr:hover td { background: #F5F5F5; }
+td { padding: 10px 12px; border-bottom: 1px solid #334155; }
+tr:hover td { background: #0f172a; } /* Efeito hover noturno */
 
 /* — Badges de status —————————————————————————————————————————————— */
 .badge {
@@ -152,14 +156,17 @@ tr:hover td { background: #F5F5F5; }
   font-weight: 700;
 }
 
-.badge-pendente { background:#FFF9C4; color:#F57F17; }
-.badge-andamento { background:#E3F2FD; color:#0D47A1; }
-.badge-concluida { background:#E8F5E9; color:#2E7D32; }
+/* Removido o amarelo quente, usando tons frios para os 3 status */
+.badge-pendente { background: #1e3a8a; color: #bfdbfe; } /* Azul marinho */
+.badge-andamento { background: #312e81; color: #c7d2fe; } /* Índigo profundo */
+.badge-concluida { background: #064e3b; color: #a7f3d0; } /* Verde escuro frio */
 
 /* — Select de status na tabela ——————————————————————————————————— */
 .select-status {
   padding: 3px 6px;
-  border: 1px solid #CFD8DC;
+  background: #0f172a;
+  color: #e2e8f0;
+  border: 1px solid #334155;
   border-radius: 4px;
   font-size: 0.82rem;
   cursor: pointer;
@@ -169,8 +176,8 @@ tr:hover td { background: #F5F5F5; }
 #loading {
   text-align: center;
   padding: 1rem;
-  color: #00897B;
+  color: #2dd4bf;
   font-weight: 600;
 }
 
-#sem-dados { text-align:center; padding:2rem; color:#90A4AE; }
+#sem-dados { text-align:center; padding:2rem; color: #64748b; }
