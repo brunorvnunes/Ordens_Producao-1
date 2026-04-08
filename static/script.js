@@ -2,6 +2,9 @@
 // Em produção, trocamos por: 'https://meuservidor.com.br'
 const API_URL = 'http://localhost:5000';
 
+// NOVA VARIÁVEL: Controla se estamos criando uma nova ordem ou editando uma existente
+let ordemIdEmEdicao = null; 
+
 // 5.3 Verificando o status da API
 async function verificarStatus() {
     const badge = document.getElementById('status-badge');
@@ -44,33 +47,35 @@ async function carregarOrdens() {
             return;
         }
 
-        // Para cada ordem, cria uma linha <tr> na tabela
-        corpo.innerHTML = ordens.map(ordem => `
-            <tr id="linha-${ordem.id}">
-                <td>${ordem.id}</td>
-                <td>${ordem.id}</td>
-                <td>${ordem.produto}</td>
-                <td>${ordem.quantidade}</td>
-                <td>${renderizarBadge(ordem.status)}</td>
-                <td>${ordem.criado_em}</td>
-                <td>
-                    <select class="select-status" onchange="atualizarStatus(${ordem.id}, this.value)">
-                        <option value="Pendente" ${ordem.status === 'Pendente' ? 'selected' : ''}>
-                            Pendente
-                        </option>
-                        <option value="Em andamento" ${ordem.status === 'Em andamento' ? 'selected' : ''}>
-                            Em andamento
-                        </option>
-                        <option value="Concluida" ${ordem.status === 'Concluida' ? 'selected' : ''}>
-                            Concluida
-                        </option>
-                    </select>
-                    <button class="btn-excluir" onclick="excluirOrdem(${ordem.id})">
-                        Excluir
-                    </button>
-                </td>
-            </tr>
-        `).join('');
+// Para cada ordem, cria uma linha <tr> na tabela
+corpo.innerHTML = ordens.map(ordem => `
+<tr id="linha-${ordem.id}">
+    <td>${ordem.id}</td>
+    <td>${ordem.produto}</td>
+    <td>${ordem.quantidade}</td>
+    <td>${renderizarBadge(ordem.status)}</td>
+    <td>${ordem.criado_em}</td>
+    <td>
+        <select class="select-status" onchange="atualizarStatus(${ordem.id}, this.value)">
+            <option value="Pendente" ${ordem.status === 'Pendente' ? 'selected' : ''}>
+                Pendente
+            </option>
+            <option value="Em andamento" ${ordem.status === 'Em andamento' ? 'selected' : ''}>
+                Em andamento
+            </option>
+            <option value="Concluida" ${ordem.status === 'Concluida' ? 'selected' : ''}>
+                Concluida
+            </option>
+        </select>
+        <button class="btn-editar" onclick="prepararEdicao(${ordem.id})">
+            Editar
+        </button>
+        <button class="btn-excluir" onclick="excluirOrdem(${ordem.id})">
+            Excluir
+        </button>
+    </td>
+</tr>
+`).join('');
 
         // Exibe a tabela preenchida
         tabela.classList.remove('oculto');
@@ -91,6 +96,35 @@ function renderizarBadge(status) {
     };
     const cls = classes[status] || 'badge';
     return `<span class="${cls}">${status}</span>`;
+}
+
+// NOVA FUNÇÃO: Prepara o formulário com os dados da tabela para editar
+function prepararEdicao(id) {
+    const linha = document.getElementById(`linha-${id}`);
+    if (!linha) return;
+
+    // Pega os textos das colunas (1 = Produto, 2 = Quantidade)
+    const produto = linha.cells[1].textContent;
+    const quantidade = linha.cells[2].textContent;
+    
+    // Pega o status atual direto do select
+    const selectStatus = linha.querySelector('.select-status');
+
+    // Joga os valores para o formulário lá no topo
+    document.getElementById('produto').value = produto;
+    document.getElementById('quantidade').value = quantidade;
+    if (selectStatus) {
+        document.getElementById('status-novo').value = selectStatus.value;
+    }
+
+    ordemIdEmEdicao = id; // Avisa o sistema que estamos no modo "Edição"
+
+    // Muda o texto do botão
+    const btn = document.getElementById('btn-cadastrar');
+    btn.textContent = 'Salvar Edição';
+    
+    // Sobe a tela de volta pro formulário
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 async function criarOrdem() {
@@ -115,15 +149,17 @@ async function criarOrdem() {
     // Desabilita o botao para evitar duplo clique
     const btn = document.getElementById('btn-cadastrar');
     btn.disabled = true;
-    btn.textContent = 'Cadastrando...';
+    btn.textContent = ordemIdEmEdicao ? 'Salvando...' : 'Cadastrando...';
 
     try {
-        const resposta = await fetch(`${API_URL}/ordens`, {
-            method: 'POST',
-            // Content-Type diz ao Flask que o body e JSON
+        // LÓGICA AJUSTADA: Decide se faz POST (Criar) ou PUT (Editar)
+        const url = ordemIdEmEdicao ? `${API_URL}/ordens/${ordemIdEmEdicao}` : `${API_URL}/ordens`;
+        const metodo = ordemIdEmEdicao ? 'PUT' : 'POST';
+
+        const resposta = await fetch(url, {
+            method: metodo,
             headers: { 'Content-Type': 'application/json' },
-            // JSON.stringify converte objeto JS em string JSON
-            body: JSON.stringify({
+            body:JSON.stringify({
                 produto: produto,
                 quantidade: Number(quantidade),
                 status: status
@@ -133,13 +169,15 @@ async function criarOrdem() {
         const dados = await resposta.json();
 
         if (resposta.ok) { // resposta.ok = true para status 200-299
-            exibirMensagem(`Ordem #${dados.id} cadastrada com sucesso!`, 'sucesso');
+            const msgSucesso = ordemIdEmEdicao ? `Ordem #${ordemIdEmEdicao} atualizada!` : `Ordem #${dados.id} cadastrada com sucesso!`;
+            exibirMensagem(msgSucesso, 'sucesso');
+            
             limparFormulario();
             await carregarOrdens();   // Atualiza a tabela
             await verificarStatus();  // Atualiza o contador no cabecalho
         } else {
             // Exibe a mensagem de erro retornada pelo Flask
-            exibirMensagem(dados.erro || 'Erro ao cadastrar.', 'erro');
+            exibirMensagem(dados.erro || 'Erro ao salvar.', 'erro');
         }
 
     } catch (erro) {
@@ -148,7 +186,7 @@ async function criarOrdem() {
     } finally {
         // O bloco finally executa SEMPRE, com ou sem erro
         btn.disabled = false;
-        btn.textContent = 'Cadastrar Ordem';
+        if (!ordemIdEmEdicao) btn.textContent = 'Cadastrar Ordem';
     }
 }
 
@@ -157,6 +195,10 @@ function limparFormulario() {
     document.getElementById('produto').value = '';
     document.getElementById('quantidade').value = '';
     document.getElementById('status-novo').value = 'Pendente';
+    
+    // Tira o sistema do modo de edição e reseta o botão
+    ordemIdEmEdicao = null;
+    document.getElementById('btn-cadastrar').textContent = 'Cadastrar Ordem';
 }
 
 async function atualizarStatus(id, novoStatus) {
@@ -176,7 +218,7 @@ async function atualizarStatus(id, novoStatus) {
             // Atualiza apenas o badge na linha, sem recarregar a tabela inteira (mais rápido)
             const linha = document.getElementById(`linha-${id}`);
             if (linha) {
-                const tdStatus = linha.cells[4]; // Localiza a célula do status (coluna 4)
+                const tdStatus = linha.cells[3]; // CORRIGIDO PARA COLUNA 3 (A coluna 4 era a Data)
                 tdStatus.innerHTML = renderizarBadge(novoStatus); // Troca o HTML pelo novo badge
             }
             await verificarStatus(); // Atualiza o contador geral no topo
